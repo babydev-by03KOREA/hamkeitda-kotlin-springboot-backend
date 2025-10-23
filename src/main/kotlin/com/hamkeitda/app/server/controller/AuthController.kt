@@ -1,9 +1,9 @@
 package com.hamkeitda.app.server.controller
 
 import com.hamkeitda.app.server.common.Result
-import com.hamkeitda.app.server.dto.LoginRequest
-import com.hamkeitda.app.server.dto.RegisterRequest
-import com.hamkeitda.app.server.dto.TokenPairResponse
+import com.hamkeitda.app.server.dto.auth.LoginRequest
+import com.hamkeitda.app.server.dto.auth.RegisterRequest
+import com.hamkeitda.app.server.dto.auth.TokenPairResponse
 import com.hamkeitda.app.server.service.AuthService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid

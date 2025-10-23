@@ -1,9 +1,8 @@
-package com.hamkeitda.app.server.dto
+package com.hamkeitda.app.server.dto.auth
 
 import com.hamkeitda.app.server.role.UserRole
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
 data class RegisterRequest(

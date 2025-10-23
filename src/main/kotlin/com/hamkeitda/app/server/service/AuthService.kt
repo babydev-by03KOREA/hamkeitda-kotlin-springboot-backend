@@ -2,10 +2,10 @@ package com.hamkeitda.app.server.service
 
 import com.hamkeitda.app.server.common.exception.ApiException
 import com.hamkeitda.app.server.common.jwt.JwtTokenProvider
-import com.hamkeitda.app.server.dto.LoginRequest
-import com.hamkeitda.app.server.dto.RegisterRequest
-import com.hamkeitda.app.server.dto.RegisterResponse
-import com.hamkeitda.app.server.dto.TokenPairResponse
+import com.hamkeitda.app.server.dto.auth.LoginRequest
+import com.hamkeitda.app.server.dto.auth.RegisterRequest
+import com.hamkeitda.app.server.dto.auth.RegisterResponse
+import com.hamkeitda.app.server.dto.auth.TokenPairResponse
 import com.hamkeitda.app.server.entity.User
 import com.hamkeitda.app.server.repository.UserRepository
 import com.hamkeitda.app.server.store.RefreshTokenStore
