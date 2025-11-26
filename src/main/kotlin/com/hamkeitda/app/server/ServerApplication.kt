@@ -14,6 +14,8 @@ fun main(args: Array<String>) {
     System.setProperty("DATABASE_USERNAME", dotenv["DATABASE_USERNAME"])
     System.setProperty("DATABASE_PASSWORD", dotenv["DATABASE_PASSWORD"])
     System.setProperty("JWT_SECRET", dotenv["JWT_SECRET"])
+    System.setProperty("NCP_ACCESS_KEY", dotenv["NCP_ACCESS_KEY"])
+    System.setProperty("NCP_SECRET_KEY", dotenv["NCP_SECRET_KEY"])
 
     runApplication<ServerApplication>(*args)
 }
