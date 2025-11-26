@@ -1,8 +1,11 @@
 spring:
+  config:
+    import: optional:classpath:env.properties
+
   servlet:
     multipart:
-      max-file-size: 20MB
       max-request-size: 20MB
+      max-file-size: 20MB
   data:
     redis:
       host: 127.0.0.1
@@ -28,7 +31,7 @@ spring:
 
 logging:
   level:
-    org.springframework.data.redis: DEBUG   # ?? ?? ???
+    org.springframework.data.redis: DEBUG
 
 jwt:
   secret: ${JWT_SECRET}
@@ -37,6 +40,7 @@ jwt:
 
 ncp:
   storage:
+    bucket: hamkeitda
     region: kr-standard
     endpoint: https://kr.object.ncloudstorage.com
     accessKey: ${NCP_ACCESS_KEY}

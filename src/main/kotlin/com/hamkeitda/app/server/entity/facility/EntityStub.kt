@@ -7,4 +7,4 @@ internal fun Facility.Companion.stub() = Facility(
     phoneNumber = "", address = "", description = ""
 )
 
-internal fun BBS.Companion.stub() = Bbs(id = 0, facility = Facility.stub(), title = "", content = "")
+internal fun BBS.Companion.stub() = BBS(id = 0, facility = Facility.stub(), title = "", content = "")

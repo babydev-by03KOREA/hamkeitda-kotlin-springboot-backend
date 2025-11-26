@@ -1,8 +1,10 @@
 package com.hamkeitda.app.server.entity.facility
 
 import com.hamkeitda.app.server.dto.facility.NecessaryDocumentCreate
+import com.hamkeitda.app.server.dto.facility.request.FacilitySaveRequest
 import jakarta.persistence.*
 import org.hibernate.annotations.BatchSize
+import java.math.BigDecimal
 import java.time.LocalTime
 
 @Entity
@@ -11,7 +13,8 @@ import java.time.LocalTime
     // 읽기 쿼리를 자주 수행하는 컬럼 조회 속도 향상 & SELECT, JOIN, ORDER BY, WHERE 조건 최적화
     indexes = [
         Index(name = "idx_facility_name", columnList = "name"),
-        Index(name = "idx_facility_address", columnList = "address")
+        Index(name = "idx_facility_address", columnList = "address"),
+        Index(name = "idx_facility_lat_lng", columnList = "latitude, longitude")
     ]
 )
 class Facility(
@@ -20,22 +23,28 @@ class Facility(
     val id: Long = 0,
 
     @Column(nullable = false, length = 100)
-    val name: String,
+    var name: String,
 
     @Column(nullable = false)
-    val openTime: LocalTime,
+    var openTime: LocalTime,
 
     @Column(nullable = false)
-    val closedTime: LocalTime,
+    var closedTime: LocalTime,
 
     @Column(nullable = false, length = 20)
-    val phoneNumber: String,
+    var phoneNumber: String,
 
     @Column(nullable = false, length = 200)
-    val address: String,
+    var address: String,
 
     @Column(nullable = false, columnDefinition = "text")
-    val description: String,
+    var description: String,
+
+    @Column(precision = 10, scale = 7)
+    val latitude: BigDecimal? = null,
+
+    @Column(precision = 10, scale = 7)
+    val longitude: BigDecimal? = null,
 
     // 시설 사진
     @OneToMany(mappedBy = "facility", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
@@ -95,7 +104,7 @@ class Facility(
 ) {
     protected constructor() : this(
         id = 0, name = "", openTime = LocalTime.MIDNIGHT, closedTime = LocalTime.MIDNIGHT,
-        phoneNumber = "", address = "", description = ""
+        phoneNumber = "", address = "", description = "", latitude = null, longitude = null
     )
 
     fun addImage(url: String, isPrimary: Boolean = false, caption: String? = null, sortOrder: Int? = null) {
@@ -141,16 +150,13 @@ class Facility(
         necessaryDocuments.removeIf { it.id == docId }
     }
 
-    fun replaceAllDocuments(newDocs: List<NecessaryDocumentCreate>) {
-        necessaryDocuments.clear()
-        newDocs.forEachIndexed { idx, it ->
-            necessaryDocuments += NecessaryDocument(
-                facility = this,
-                documentName = it.documentName,
-                howToGet = it.howToGet,
-                sortOrder = idx
-            )
-        }
+    fun updateBasicInfo(req: FacilitySaveRequest) {
+        this.name = req.name
+        this.openTime = req.openTime
+        this.closedTime = req.closedTime
+        this.phoneNumber = req.phoneNumber
+        this.address = req.address
+        this.description = req.description
     }
 
     companion object

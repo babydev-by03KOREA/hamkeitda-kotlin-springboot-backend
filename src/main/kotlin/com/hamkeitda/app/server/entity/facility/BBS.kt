@@ -51,7 +51,7 @@ class BBS(
     @OrderBy("sortOrder ASC, id ASC")
     val images: MutableList<BbsImage> = mutableListOf()
 ) {
-    protected constructor() : this(
+    constructor() : this(
         id = 0, facility = Facility.stub(), title = "", content = ""
     )
 

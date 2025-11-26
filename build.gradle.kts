@@ -41,8 +41,6 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.springframework.boot:spring-boot-starter-validation")
-    // https://mvnrepository.com/artifact/io.github.cdimascio/dotenv-kotlin
-    implementation("io.github.cdimascio:dotenv-kotlin:6.5.1")
     implementation("io.jsonwebtoken:jjwt-api:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.6")
