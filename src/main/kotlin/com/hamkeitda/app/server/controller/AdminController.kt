@@ -5,7 +5,9 @@ import com.hamkeitda.app.server.dto.facility.request.FacilitySaveRequest
 import com.hamkeitda.app.server.dto.facility.request.FeeCreateRequest
 import com.hamkeitda.app.server.dto.facility.request.NecessaryDocumentCreateRequest
 import com.hamkeitda.app.server.dto.facility.request.ProgramCreateRequest
+import com.hamkeitda.app.server.dto.facility.response.BbsImageResponse
 import com.hamkeitda.app.server.dto.facility.response.CounselNotificationResponse
+import com.hamkeitda.app.server.dto.facility.response.FacilityImageResponse
 import com.hamkeitda.app.server.dto.facility.response.IdResponse
 import com.hamkeitda.app.server.service.AdminService
 import org.springframework.data.domain.Page
@@ -20,7 +22,9 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestPart
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/admin")
@@ -147,4 +151,35 @@ class AdminController(
         @RequestParam(defaultValue = "20") size: Int
     ): Page<CounselNotificationResponse> =
         adminService.getCounselNotifications(facilityId, page, size)
+
+    /**
+     * 시설 이미지 업로드
+     * POST /api/admin/facility/{facilityId}/images
+     * multipart/form-data
+     *  - file: 이미지 파일
+     *  - isPrimary: 대표 이미지 여부 (optional, default=false)
+     *  - caption: 캡션 (optional)
+     */
+    @PostMapping("/{facilityId}/images", consumes = ["multipart/form-data"])
+    fun uploadFacilityImage(
+        @PathVariable facilityId: Long,
+        @RequestPart("file") file: MultipartFile,
+        @RequestParam(required = false, defaultValue = "false") isPrimary: Boolean,
+        @RequestParam(required = false) caption: String?
+    ): FacilityImageResponse =
+        adminService.uploadFacilityImage(facilityId, file, isPrimary, caption)
+
+    /**
+     * 게시물 이미지 업로드
+     * POST /api/admin/facility/{facilityId}/bbs/{bbsId}/images
+     */
+    @PostMapping("/{facilityId}/bbs/{bbsId}/images", consumes = ["multipart/form-data"])
+    fun uploadBbsImage(
+        @PathVariable facilityId: Long,          // 혹시 추후 권한 체크 등을 위해 함께 받기
+        @PathVariable bbsId: Long,
+        @RequestPart("file") file: MultipartFile,
+        @RequestParam(required = false, defaultValue = "false") isPrimary: Boolean,
+        @RequestParam(required = false) caption: String?
+    ): BbsImageResponse =
+        adminService.uploadBbsImage(facilityId, bbsId, file, isPrimary, caption)
 }
