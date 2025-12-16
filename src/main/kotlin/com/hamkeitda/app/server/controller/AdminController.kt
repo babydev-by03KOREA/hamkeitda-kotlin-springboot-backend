@@ -62,6 +62,16 @@ class AdminController(
         adminService.updateFacilityBasic(facilityId, req)
 
     /**
+     * 필요 서류 불러오기
+     * GET /api/admin/{facilityId}/documents
+     */
+    @GetMapping("/{facilityId}/documents")
+    fun getNecessaryDocuments(
+        @PathVariable facilityId: Long
+    ): List<NecessaryDocumentResponse> =
+        adminService.getNecessaryDocuments(facilityId)
+
+    /**
      * 필요 서류 관리 - 등록 (단일)
      * POST /api/admin/{facilityId}/documents
      */
@@ -90,6 +100,16 @@ class AdminController(
     }
 
     /**
+     * 프로그램 목록 조회
+     * GET /api/admin/{facilityId}/programs
+     */
+    @GetMapping("/{facilityId}/programs")
+    fun getPrograms(
+        @PathVariable facilityId: Long
+    ): List<ProgramResponse> =
+        adminService.getPrograms(facilityId)
+
+    /**
      * 프로그램 관리 - 추가하기
      * POST /api/admin/{facilityId}/programs
      */
@@ -108,9 +128,20 @@ class AdminController(
     fun deleteProgram(
         @PathVariable facilityId: Long,
         @PathVariable programId: Long
-    ) {
+    ): ResponseEntity<Void> {
         adminService.deleteProgram(facilityId, programId)
+        return ResponseEntity.noContent().build()
     }
+
+    /**
+     * 이용료 목록 조회
+     * GET /api/admin/{facilityId}/fees
+     */
+    @GetMapping("/{facilityId}/fees")
+    fun getFees(
+        @PathVariable facilityId: Long
+    ): List<FeeResponse> =
+        adminService.getFees(facilityId)
 
     /**
      * 이용료 관리 - 추가하기
@@ -131,9 +162,22 @@ class AdminController(
     fun deleteFee(
         @PathVariable facilityId: Long,
         @PathVariable feeId: Long
-    ) {
+    ): ResponseEntity<Void> {
         adminService.deleteFee(facilityId, feeId)
+        return ResponseEntity.noContent().build()
     }
+
+    /**
+     * 게시물 목록 조회
+     * GET /api/admin/{facilityId}/bbs?page=0&size=20 (or 전체)
+     */
+    @GetMapping("/{facilityId}/bbs")
+    fun getBbs(
+        @PathVariable facilityId: Long,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "20") size: Int
+    ): Page<BbsResponse> =
+        adminService.getBbs(facilityId, page, size)
 
     /**
      * 게시물 관리 - 게시물 등록하기

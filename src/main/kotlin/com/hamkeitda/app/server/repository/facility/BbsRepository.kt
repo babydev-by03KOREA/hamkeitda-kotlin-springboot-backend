@@ -7,8 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface BbsRepository : JpaRepository<BBS, Long> {
     fun findAllByFacilityId(facilityId: Long, pageable: Pageable): Page<BBS>
-    fun findAllByFacilityIdOrderByIsPinnedDescCreatedAtDesc(
-        facilityId: Long,
-        pageable: Pageable
-    ): Page<BBS>
+    fun findByFacilityId(facilityId: Long, pageable: Pageable): Page<BBS>
 }

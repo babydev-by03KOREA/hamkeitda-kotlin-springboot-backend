@@ -26,6 +26,7 @@ import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
@@ -133,6 +134,14 @@ class AdminService(
     }
 
     /**
+     * 필요 서류 불러오기
+     */
+    fun getNecessaryDocuments(facilityId: Long): List<NecessaryDocumentResponse> {
+        val docs = necessaryDocRepo.findAllByFacilityIdOrderByIdDesc(facilityId)
+        return docs.map { NecessaryDocumentResponse(it.id, it.documentName, it.howToGet) }
+    }
+
+    /**
      * 필요 서류 등록 (단일)
      */
     fun addNecessaryDocument(
@@ -174,6 +183,14 @@ class AdminService(
     }
 
     /**
+     * 프로그램 불러오기
+     */
+    fun getPrograms(facilityId: Long): List<ProgramResponse> {
+        val list = programRepo.findAllByFacilityIdOrderByIdDesc(facilityId)
+        return list.map { ProgramResponse(it.id, it.programName, it.programDescription) }
+    }
+
+    /**
      * 프로그램 추가
      */
     fun addProgram(facilityId: Long, req: ProgramCreateRequest): IdResponse {
@@ -198,8 +215,24 @@ class AdminService(
      */
     fun deleteProgram(facilityId: Long, programId: Long) {
         val deleted = programRepo.deleteByIdAndFacilityId(programId, facilityId)
-        if (deleted == 0L) {
-            throw ApiException(HttpStatus.NOT_FOUND, "해당 프로그램이 존재하지 않거나 시설에 속하지 않습니다.")
+        if (deleted == 0) {
+            throw ApiException(HttpStatus.NOT_FOUND, "프로그램이 존재하지 않거나 시설에 속하지 않습니다.")
+        }
+    }
+
+    /**
+     * 이용료 불러오기
+     */
+    fun getFees(facilityId: Long): List<FeeResponse> {
+        val list = feeRepo.findAllByFacilityIdOrderBySortOrderAsc(facilityId)
+
+        return list.map {
+            FeeResponse(
+                id = it.id,
+                title = it.title,
+                feeText = it.feeText,
+                sortOrder = it.sortOrder
+            )
         }
     }
 
@@ -226,11 +259,21 @@ class AdminService(
     /**
      * 이용료 삭제
      */
+    @Transactional
     fun deleteFee(facilityId: Long, feeId: Long) {
         val deleted = feeRepo.deleteByIdAndFacilityId(feeId, facilityId)
-        if (deleted == 0L) {
+        if (deleted == 0) {
             throw ApiException(HttpStatus.NOT_FOUND, "해당 이용료가 존재하지 않거나 시설에 속하지 않습니다.")
         }
+    }
+
+    /**
+     * 게시물 불러오기
+     */
+    fun getBbs(facilityId: Long, page: Int, size: Int): Page<BbsResponse> {
+        val p = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"))
+        return bbsRepo.findByFacilityId(facilityId, p)
+            .map { BbsResponse(it.id, it.title, it.content, it.isPinned, it.createdAt) }
     }
 
     /**

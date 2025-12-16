@@ -11,4 +11,5 @@ interface NecessaryDocumentRepository : JpaRepository<NecessaryDocument, Long> {
                 "where nd.facility.id = :facilityId"
     )
     fun findMaxSortOrderByFacilityId(facilityId: Long): Int
+    fun findAllByFacilityIdOrderByIdDesc(facilityId: Long): List<NecessaryDocument>
 }
