@@ -3,7 +3,10 @@ package com.hamkeitda.app.server.service
 import com.hamkeitda.app.server.common.exception.ApiException
 import com.hamkeitda.app.server.common.jwt.JwtTokenProvider
 import com.hamkeitda.app.server.dto.auth.LoginRequest
+import com.hamkeitda.app.server.dto.auth.RegisterRequest
+import com.hamkeitda.app.server.dto.auth.RegisterResponse
 import com.hamkeitda.app.server.dto.auth.TokenPairResponse
+import com.hamkeitda.app.server.entity.User
 import com.hamkeitda.app.server.repository.UserRepository
 import com.hamkeitda.app.server.store.RefreshTokenStore
 import org.springframework.http.HttpStatus
@@ -45,6 +48,28 @@ class AuthService(
         )
     }
 
+    fun register(req: RegisterRequest): RegisterResponse {
+        if (userRepository.existsByEmail(req.email)) {
+            throw ApiException(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다.")
+        }
+
+        val encodedPw = passwordEncoder.encode(req.password)
+        val user = User(
+            email = req.email,
+            password = encodedPw,
+            nickname = req.nickname,
+            role = req.role
+        )
+        val saved = userRepository.save(user)
+
+        return RegisterResponse(
+            id = saved.id,
+            email = saved.email,
+            nickname = saved.nickname,
+            role = saved.role.value
+        )
+    }
+
     fun rotate(refreshToken: String): TokenPairResponse {
         val userId = jwt.getUserIdFromToken(refreshToken)
 
@@ -52,7 +77,7 @@ class AuthService(
             throw ApiException(HttpStatus.UNAUTHORIZED, "유효하지 않은 리프레시 토큰입니다.")
         }
 
-        // ✅ 여기서 유저를 다시 조회해서 role/name/facilityId를 확정
+        // 여기서 유저를 다시 조회해서 role/name/facilityId를 확정
         val user = userRepository.findById(userId)
             .orElseThrow { ApiException(HttpStatus.UNAUTHORIZED, "유저가 존재하지 않습니다.") }
 
