@@ -28,7 +28,7 @@ import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/api/admin")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('FACILITY')")
 class AdminController(
     private val adminService: AdminService,
 ) {
