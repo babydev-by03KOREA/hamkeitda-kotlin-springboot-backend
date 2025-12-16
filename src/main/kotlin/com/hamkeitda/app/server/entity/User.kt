@@ -23,7 +23,7 @@ class User(
     val role: UserRole = UserRole.USER,
 
     @Column(name = "facility_id")
-    val facilityId: Long? = null
+    var facilityId: Long? = null
 ) {
     protected constructor() : this(0, "", "", "", UserRole.USER)
 }

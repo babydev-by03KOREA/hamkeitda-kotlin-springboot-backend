@@ -7,17 +7,22 @@ import com.hamkeitda.app.server.dto.auth.RegisterRequest
 import com.hamkeitda.app.server.dto.auth.RegisterResponse
 import com.hamkeitda.app.server.dto.auth.TokenPairResponse
 import com.hamkeitda.app.server.entity.User
+import com.hamkeitda.app.server.entity.facility.Facility
 import com.hamkeitda.app.server.repository.UserRepository
+import com.hamkeitda.app.server.repository.facility.FacilityRepository
+import com.hamkeitda.app.server.role.UserRole
 import com.hamkeitda.app.server.store.RefreshTokenStore
 import org.springframework.http.HttpStatus
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalTime
 
 @Service
 @Transactional
 class AuthService(
     private val userRepository: UserRepository,
+    private val facilityRepository: FacilityRepository,
     private val passwordEncoder: PasswordEncoder,
     private val jwt: JwtTokenProvider,
     private val refreshStore: RefreshTokenStore
@@ -48,25 +53,44 @@ class AuthService(
         )
     }
 
+    @Transactional
     fun register(req: RegisterRequest): RegisterResponse {
         if (userRepository.existsByEmail(req.email)) {
-            throw ApiException(HttpStatus.CONFLICT, "이미 존재하는 이메일입니다.")
+            throw ApiException(HttpStatus.CONFLICT, "이미 가입된 이메일입니다.")
         }
 
-        val encodedPw = passwordEncoder.encode(req.password)
         val user = User(
             email = req.email,
-            password = encodedPw,
             nickname = req.nickname,
-            role = req.role
+            password = passwordEncoder.encode(req.password),
+            role = req.role,
+            facilityId = null
         )
-        val saved = userRepository.save(user)
+        val savedUser = userRepository.save(user)
+
+        if (savedUser.role == UserRole.FACILITY) {
+            val facility = facilityRepository.save(
+                Facility(
+                    // 최소 필수 컬럼만 맞춰서 생성 (나머지는 기본값/nullable)
+                    name = "${savedUser.nickname}님의 시설",
+                    openTime = LocalTime.of(9, 0),
+                    closedTime = LocalTime.of(18, 0),
+                    phoneNumber = "",
+                    address = "",
+                    description = "",
+                )
+            )
+
+            savedUser.facilityId = facility.id
+            userRepository.save(savedUser)
+        }
 
         return RegisterResponse(
-            id = saved.id,
-            email = saved.email,
-            nickname = saved.nickname,
-            role = saved.role.value
+            id = savedUser.id,
+            email = savedUser.email,
+            nickname = savedUser.nickname,
+            role = savedUser.role.value,
+            facilityId = savedUser.facilityId
         )
     }
 

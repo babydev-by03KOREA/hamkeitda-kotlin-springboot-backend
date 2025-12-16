@@ -29,5 +29,6 @@ data class RegisterResponse(
     val id: Long,
     val email: String,
     val nickname: String,
-    val role: String
+    val role: String,
+    val facilityId: Long?,
 )
