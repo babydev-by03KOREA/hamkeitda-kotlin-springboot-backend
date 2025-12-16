@@ -22,7 +22,11 @@ data class LoginRequest(
 data class TokenPairResponse(
     val accessToken: String,
     val refreshToken: String,
-    val expiresIn: Long,         // access 만료(초)
-    val refreshExpiresIn: Long,  // refresh 만료(초)
-    val role: String             // UserRole.value
+    val expiresIn: Long,
+    val refreshExpiresIn: Long,
+
+    val role: String,        // UserRole.value
+    val userId: Long,
+    val name: String,
+    val facilityId: Long?    // member/guest null
 )
