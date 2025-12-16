@@ -1,13 +1,14 @@
 package com.hamkeitda.app.server.controller
 
 import com.hamkeitda.app.server.common.Result
-import com.hamkeitda.app.server.dto.auth.LoginRequest
-import com.hamkeitda.app.server.dto.auth.RegisterRequest
-import com.hamkeitda.app.server.dto.auth.TokenPairResponse
+import com.hamkeitda.app.server.common.exception.ApiException
+import com.hamkeitda.app.server.dto.auth.*
 import com.hamkeitda.app.server.service.AuthService
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
+import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -23,17 +24,20 @@ class AuthController(
      */
     @PostMapping("/register")
     fun register(
-        @RequestBody @Valid req: RegisterRequest,
-        request: HttpServletRequest
+        @RequestBody @Valid req: RegisterRequest, request: HttpServletRequest
     ): Result.Ok<Map<String, Any>> {
         val result = authService.register(req)
-        log.info("[REGISTER] email={}, nickname={}, role={}, ip={}",
-            result.email, result.nickname, result.role, request.remoteAddr)
+        log.info(
+            "[REGISTER] email={}, nickname={}, role={}, ip={}",
+            result.email,
+            result.nickname,
+            result.role,
+            request.remoteAddr
+        )
 
         return Result.Ok(
             mapOf(
-                "user" to result,
-                "message" to "회원가입이 완료되었습니다."
+                "user" to result, "message" to "회원가입이 완료되었습니다."
             )
         )
     }
@@ -43,8 +47,7 @@ class AuthController(
      */
     @PostMapping("/login")
     fun login(
-        @RequestBody @Valid req: LoginRequest,
-        request: HttpServletRequest
+        @RequestBody @Valid req: LoginRequest, request: HttpServletRequest
     ): Result.Ok<TokenPairResponse> {
         val start = System.currentTimeMillis()
         val ip = request.remoteAddr
@@ -55,16 +58,14 @@ class AuthController(
         } catch (e: Exception) {
             val took = System.currentTimeMillis() - start
             log.warn(
-                "[LOGIN_FAIL] email={}, ip={}, ua={}, took={}ms, reason={}",
-                req.email, ip, ua, took, e.message
+                "[LOGIN_FAIL] email={}, ip={}, ua={}, took={}ms, reason={}", req.email, ip, ua, took, e.message
             )
             throw e
         }
 
         val took = System.currentTimeMillis() - start
         log.info(
-            "[LOGIN_SUCCESS] email={}, role={}, ip={}, ua={}, took={}ms",
-            req.email, tokenPair.role, ip, ua, took
+            "[LOGIN_SUCCESS] email={}, role={}, ip={}, ua={}, took={}ms", req.email, tokenPair.role, ip, ua, took
         )
 
         return Result.Ok(tokenPair)
@@ -75,8 +76,7 @@ class AuthController(
      */
     @PostMapping("/logout")
     fun logout(
-        @RequestHeader("Authorization") token: String,
-        request: HttpServletRequest
+        @RequestHeader("Authorization") token: String, request: HttpServletRequest
     ): Result.Ok<Map<String, String>> {
         val refreshToken = token.removePrefix("Bearer ").trim()
         authService.logout(refreshToken)
@@ -90,12 +90,21 @@ class AuthController(
      */
     @PostMapping("/refresh")
     fun refresh(
-        @RequestHeader("Authorization") token: String,
-        request: HttpServletRequest
+        @RequestHeader("Authorization") token: String, request: HttpServletRequest
     ): Result.Ok<TokenPairResponse> {
         val refreshToken = token.removePrefix("Bearer ").trim()
         val result = authService.rotate(refreshToken)
         log.info("[TOKEN_REFRESH] ip={}, newAccessToken={}", request.remoteAddr, result.accessToken.take(20) + "...")
         return Result.Ok(result)
+    }
+
+    @GetMapping("/me")
+    fun me(
+        @AuthenticationPrincipal principal: CustomUserPrincipal?
+    ): MeResponse {
+        if (principal == null) {
+            throw ApiException(HttpStatus.UNAUTHORIZED, "인증 정보가 없습니다.")
+        }
+        return authService.me(principal.userId)
     }
 }

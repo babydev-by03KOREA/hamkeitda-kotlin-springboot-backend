@@ -1,5 +1,6 @@
 package com.hamkeitda.app.server.common.jwt
 
+import com.hamkeitda.app.server.dto.auth.CustomUserPrincipal
 import com.hamkeitda.app.server.role.UserRole
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -35,7 +36,13 @@ class JwtAuthenticationFilter(
             // 로그인 감시·감사 로그에 IP/세션 기록 & 세션 제어 및 동시 로그인 제한 & IP 기반 보안 정책 적용
             auth.details = WebAuthenticationDetailsSource().buildDetails(request)
 
-            SecurityContextHolder.getContext().authentication = auth
+//            SecurityContextHolder.getContext().authentication = auth
+            SecurityContextHolder.getContext().authentication =
+                UsernamePasswordAuthenticationToken(
+                    CustomUserPrincipal(userId, userRole.value),
+                    null,
+                    emptyList()
+                )
         }
 
         filterChain.doFilter(request, response)

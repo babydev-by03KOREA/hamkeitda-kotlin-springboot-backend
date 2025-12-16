@@ -2,10 +2,7 @@ package com.hamkeitda.app.server.service
 
 import com.hamkeitda.app.server.common.exception.ApiException
 import com.hamkeitda.app.server.common.jwt.JwtTokenProvider
-import com.hamkeitda.app.server.dto.auth.LoginRequest
-import com.hamkeitda.app.server.dto.auth.RegisterRequest
-import com.hamkeitda.app.server.dto.auth.RegisterResponse
-import com.hamkeitda.app.server.dto.auth.TokenPairResponse
+import com.hamkeitda.app.server.dto.auth.*
 import com.hamkeitda.app.server.entity.User
 import com.hamkeitda.app.server.entity.facility.Facility
 import com.hamkeitda.app.server.repository.UserRepository
@@ -130,5 +127,20 @@ class AuthService(
     fun logout(refreshToken: String) {
         val userId = jwt.getUserIdFromToken(refreshToken)
         refreshStore.delete(userId, refreshToken)
+    }
+
+    fun me(userId: Long): MeResponse {
+        val user = userRepository.findById(userId)
+            .orElseThrow {
+                ApiException(HttpStatus.UNAUTHORIZED, "사용자를 찾을 수 없습니다.")
+            }
+
+        return MeResponse(
+            id = user.id,
+            email = user.email,
+            name = user.nickname,
+            role = user.role.value,
+            facilityId = user.facilityId
+        )
     }
 }
