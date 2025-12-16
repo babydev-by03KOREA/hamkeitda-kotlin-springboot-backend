@@ -31,7 +31,7 @@ class SecurityConfig(
                     .requestMatchers("/api/auth/**", "/api/public/**").permitAll()
                     .requestMatchers(HttpMethod.GET, "/api/facility/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/facility/*/counsel").authenticated()
-                    .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/api/admin/**").hasRole("FACILITY")
                     .anyRequest().authenticated()
             }
             .addFilterBefore(JwtAuthenticationFilter(jwt), UsernamePasswordAuthenticationFilter::class.java)

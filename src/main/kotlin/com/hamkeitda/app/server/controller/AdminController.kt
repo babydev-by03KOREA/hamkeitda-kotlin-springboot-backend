@@ -31,7 +31,7 @@ class AdminController(
 ) {
     /**
      * 시설 기본 정보 가져오기
-     * GET /api/admin/facility/{facilityId}/basic
+     * GET /api/admin/{facilityId}/basic
      */
     @GetMapping("/{facilityId}/basic")
     fun getFacilityBasic(
@@ -42,7 +42,7 @@ class AdminController(
 
     /**
      * 시설 기본 정보 저장하기
-     * POST /api/admin/facility/basic
+     * POST /api/admin/basic
      */
     @PostMapping("/basic")
     fun saveFacilityBasic(
@@ -52,7 +52,7 @@ class AdminController(
 
     /**
      * 시설 기본 정보 수정하기
-     * PUT /api/admin/facility/{facilityId}/basic
+     * PUT /api/admin/{facilityId}/basic
      */
     @PutMapping("/{facilityId}/basic")
     fun updateFacilityBasic(
@@ -63,9 +63,8 @@ class AdminController(
 
     /**
      * 필요 서류 관리 - 등록 (단일)
-     * POST /api/admin/facility/{facilityId}/documents
+     * POST /api/admin/{facilityId}/documents
      */
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{facilityId}/documents")
     fun addNecessaryDocument(
         @PathVariable facilityId: Long,
@@ -79,9 +78,8 @@ class AdminController(
 
     /**
      * 필요 서류 관리 - 개별 삭제
-     * DELETE /api/admin/facility/{facilityId}/documents/{documentId}
+     * DELETE /api/admin/{facilityId}/documents/{documentId}
      */
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{facilityId}/documents/{documentId}")
     fun deleteNecessaryDocument(
         @PathVariable facilityId: Long,
@@ -93,7 +91,7 @@ class AdminController(
 
     /**
      * 프로그램 관리 - 추가하기
-     * POST /api/admin/facility/{facilityId}/programs
+     * POST /api/admin/{facilityId}/programs
      */
     @PostMapping("/{facilityId}/programs")
     fun addProgram(
@@ -104,7 +102,7 @@ class AdminController(
 
     /**
      * 프로그램 관리 - 삭제하기
-     * DELETE /api/admin/facility/{facilityId}/programs/{programId}
+     * DELETE /api/admin/{facilityId}/programs/{programId}
      */
     @DeleteMapping("/{facilityId}/programs/{programId}")
     fun deleteProgram(
@@ -116,7 +114,7 @@ class AdminController(
 
     /**
      * 이용료 관리 - 추가하기
-     * POST /api/admin/facility/{facilityId}/fees
+     * POST /api/admin/{facilityId}/fees
      */
     @PostMapping("/{facilityId}/fees")
     fun addFee(
@@ -127,7 +125,7 @@ class AdminController(
 
     /**
      * 이용료 관리 - 삭제하기
-     * DELETE /api/admin/facility/{facilityId}/fees/{feeId}
+     * DELETE /api/admin/{facilityId}/fees/{feeId}
      */
     @DeleteMapping("/{facilityId}/fees/{feeId}")
     fun deleteFee(
@@ -139,7 +137,7 @@ class AdminController(
 
     /**
      * 게시물 관리 - 게시물 등록하기
-     * POST /api/admin/facility/{facilityId}/bbs
+     * POST /api/admin/{facilityId}/bbs
      */
     @PostMapping("/{facilityId}/bbs")
     fun createBbs(
@@ -150,7 +148,7 @@ class AdminController(
 
     /**
      * 상담 신청 알림 불러오기
-     * GET /api/admin/facility/{facilityId}/counsels?page=0&size=20
+     * GET /api/admin/{facilityId}/counsels?page=0&size=20
      */
     @GetMapping("/{facilityId}/counsels")
     fun getCounselNotifications(
@@ -162,7 +160,7 @@ class AdminController(
 
     /**
      * 시설 이미지 업로드
-     * POST /api/admin/facility/{facilityId}/images
+     * POST /api/admin/{facilityId}/images
      * multipart/form-data
      *  - file: 이미지 파일
      *  - isPrimary: 대표 이미지 여부 (optional, default=false)
@@ -179,7 +177,7 @@ class AdminController(
 
     /**
      * 게시물 이미지 업로드
-     * POST /api/admin/facility/{facilityId}/bbs/{bbsId}/images
+     * POST /api/admin/{facilityId}/bbs/{bbsId}/images
      */
     @PostMapping("/{facilityId}/bbs/{bbsId}/images", consumes = ["multipart/form-data"])
     fun uploadBbsImage(

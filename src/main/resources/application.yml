@@ -45,3 +45,7 @@ ncp:
     endpoint: https://kr.object.ncloudstorage.com
     accessKey: ${NCP_ACCESS_KEY}
     secretKey: ${NCP_SECRET_KEY}
+
+naver:
+  client-id: ${NCP_GEOCODING_CLIENT_KEY}
+  client-secret: ${NCP_GEOCODING_CLIENT_SECRET}

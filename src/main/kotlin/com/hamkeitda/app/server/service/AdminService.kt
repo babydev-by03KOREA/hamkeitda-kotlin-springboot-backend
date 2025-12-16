@@ -13,13 +13,17 @@ import com.hamkeitda.app.server.entity.facility.Fee
 import com.hamkeitda.app.server.entity.facility.NecessaryDocument
 import com.hamkeitda.app.server.entity.facility.Program
 import com.hamkeitda.app.server.mapper.toNotificationDto
+import com.hamkeitda.app.server.repository.UserRepository
 import com.hamkeitda.app.server.repository.facility.BbsRepository
 import com.hamkeitda.app.server.repository.facility.CounselRepository
 import com.hamkeitda.app.server.repository.facility.FacilityRepository
 import com.hamkeitda.app.server.repository.facility.FeeRepository
 import com.hamkeitda.app.server.repository.facility.NecessaryDocumentRepository
 import com.hamkeitda.app.server.repository.facility.ProgramRepository
+import com.hamkeitda.app.server.role.UserRole
+import com.hamkeitda.app.server.util.SecurityUtils
 import jakarta.transaction.Transactional
+import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.HttpStatus
@@ -36,7 +40,12 @@ class AdminService(
     private val bbsRepo: BbsRepository,
     private val counselRepo: CounselRepository,
     private val fileService: FileService,
+    private val geoService: NaverGeoService,
+    private val userRepository: UserRepository,
+    private val securityUtils: SecurityUtils,
 ) {
+    private val log = LoggerFactory.getLogger(javaClass)
+
     fun getFacilityBasic(facilityId: Long): FacilityBasicResponse {
         val facility = facilityRepo.findById(facilityId)
             .orElseThrow { IllegalArgumentException("시설이 존재하지 않습니다") }
@@ -55,18 +64,60 @@ class AdminService(
      * 시설 기본 정보 저장 (일단은 생성 전용으로 생각)
      * 수정까지 하고 싶으면 Facility 엔티티의 필드를 var로 바꾸거나 update 메서드를 추가해야 함.
      */
+    @Transactional
     fun saveFacilityBasic(req: FacilitySaveRequest): IdResponse {
-        val facility = Facility(
-            name = req.name,
-            openTime = req.openTime,
-            closedTime = req.closedTime,
-            phoneNumber = req.phoneNumber,
-            address = req.address,
+        val facility = findOrCreateFacility(req)
+
+        facility.apply {
+            name = req.name
+            openTime = req.openTime
+            closedTime = req.closedTime
+            phoneNumber = req.phoneNumber
+            address = req.address
             description = req.description
+        }
+
+        val geo = geoService.geocode(req.address)
+        facility.latitude = geo.lat
+        facility.longitude = geo.lng
+
+        return IdResponse(facility.id)
+    }
+
+    @Transactional
+    fun findOrCreateFacility(req: FacilitySaveRequest): Facility {
+        val user = securityUtils.currentUser()
+            ?: throw ApiException(HttpStatus.UNAUTHORIZED, "인증 정보가 없습니다.")
+
+        if (user.role != UserRole.FACILITY) {
+            throw ApiException(HttpStatus.FORBIDDEN, "시설 관리자만 접근 가능합니다.")
+        }
+
+        // 이미 facilityId가 있는 경우 → 기존 시설 조회
+        user.facilityId?.let { facilityId ->
+            return facilityRepo.findById(facilityId)
+                .orElseThrow {
+                    ApiException(HttpStatus.NOT_FOUND, "시설 정보를 찾을 수 없습니다.")
+                }
+        }
+
+        // (예외 케이스) facilityId가 없는 FACILITY 유저 → 신규 생성
+        val facility = facilityRepo.save(
+            Facility(
+                name = req.name.ifBlank { "${user.nickname}님의 시설" },
+                openTime = req.openTime,
+                closedTime = req.closedTime,
+                phoneNumber = req.phoneNumber,
+                address = req.address,
+                description = req.description,
+            )
         )
 
-        val saved = facilityRepo.save(facility)
-        return IdResponse(saved.id)
+        // user.facilityId 연결
+        user.facilityId = facility.id
+        userRepository.save(user)
+
+        return facility
     }
 
     /**

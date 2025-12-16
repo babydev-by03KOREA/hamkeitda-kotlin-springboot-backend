@@ -40,11 +40,11 @@ class Facility(
     @Column(nullable = false, columnDefinition = "text")
     var description: String,
 
-    @Column(precision = 10, scale = 7)
-    val latitude: BigDecimal? = null,
+    @Column(precision = 10, scale = 7, nullable = true)
+    var latitude: BigDecimal? = null,
 
-    @Column(precision = 10, scale = 7)
-    val longitude: BigDecimal? = null,
+    @Column(precision = 10, scale = 7, nullable = true)
+    var longitude: BigDecimal? = null,
 
     // 시설 사진
     @OneToMany(mappedBy = "facility", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.LAZY)
