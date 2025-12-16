@@ -5,10 +5,7 @@ import com.hamkeitda.app.server.dto.facility.request.FacilitySaveRequest
 import com.hamkeitda.app.server.dto.facility.request.FeeCreateRequest
 import com.hamkeitda.app.server.dto.facility.request.NecessaryDocumentCreateRequest
 import com.hamkeitda.app.server.dto.facility.request.ProgramCreateRequest
-import com.hamkeitda.app.server.dto.facility.response.BbsImageResponse
-import com.hamkeitda.app.server.dto.facility.response.CounselNotificationResponse
-import com.hamkeitda.app.server.dto.facility.response.FacilityImageResponse
-import com.hamkeitda.app.server.dto.facility.response.IdResponse
+import com.hamkeitda.app.server.dto.facility.response.*
 import com.hamkeitda.app.server.service.AdminService
 import org.springframework.data.domain.Page
 import org.springframework.http.HttpStatus
@@ -32,6 +29,17 @@ import org.springframework.web.multipart.MultipartFile
 class AdminController(
     private val adminService: AdminService,
 ) {
+    /**
+     * 시설 기본 정보 가져오기
+     * GET /api/admin/facility/{facilityId}/basic
+     */
+    @GetMapping("/{facilityId}/basic")
+    fun getFacilityBasic(
+        @PathVariable facilityId: Long
+    ): FacilityBasicResponse {
+        return adminService.getFacilityBasic(facilityId)
+    }
+
     /**
      * 시설 기본 정보 저장하기
      * POST /api/admin/facility/basic

@@ -6,10 +6,7 @@ import com.hamkeitda.app.server.dto.facility.request.FacilitySaveRequest
 import com.hamkeitda.app.server.dto.facility.request.FeeCreateRequest
 import com.hamkeitda.app.server.dto.facility.request.NecessaryDocumentCreateRequest
 import com.hamkeitda.app.server.dto.facility.request.ProgramCreateRequest
-import com.hamkeitda.app.server.dto.facility.response.BbsImageResponse
-import com.hamkeitda.app.server.dto.facility.response.CounselNotificationResponse
-import com.hamkeitda.app.server.dto.facility.response.FacilityImageResponse
-import com.hamkeitda.app.server.dto.facility.response.IdResponse
+import com.hamkeitda.app.server.dto.facility.response.*
 import com.hamkeitda.app.server.entity.facility.BBS
 import com.hamkeitda.app.server.entity.facility.Facility
 import com.hamkeitda.app.server.entity.facility.Fee
@@ -40,6 +37,20 @@ class AdminService(
     private val counselRepo: CounselRepository,
     private val fileService: FileService,
 ) {
+    fun getFacilityBasic(facilityId: Long): FacilityBasicResponse {
+        val facility = facilityRepo.findById(facilityId)
+            .orElseThrow { IllegalArgumentException("시설이 존재하지 않습니다") }
+
+        return FacilityBasicResponse(
+            name = facility.name,
+            openHours = "${facility.openTime} - ${facility.closedTime}",
+            phone = facility.phoneNumber,
+            address = facility.address,
+            description = facility.description,
+            imageUrls = facility.images.map { it.url }
+        )
+    }
+
     /**
      * 시설 기본 정보 저장 (일단은 생성 전용으로 생각)
      * 수정까지 하고 싶으면 Facility 엔티티의 필드를 var로 바꾸거나 update 메서드를 추가해야 함.
