@@ -14,35 +14,25 @@ import org.springframework.web.filter.OncePerRequestFilter
 class JwtAuthenticationFilter(
     private val jwt: JwtTokenProvider
 ) : OncePerRequestFilter() {
-    // 요청을 가로채거나, 인증/인가 검사, 로깅, 헤더 조작, CORS 처리, JWT 파싱 등 비즈니스에 맞는 전후 처리
+
     override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val token: String? = this.resolveToken(request)
+        val token = resolveToken(request)
 
         if (token != null && jwt.validateToken(token)) {
             val userId: Long = jwt.getUserIdFromToken(token)
             val userRole: UserRole = jwt.getRoleFromToken(token)
 
-            val auth =
-                UsernamePasswordAuthenticationToken(
-                    userId,
-                    null,
-                    listOf(SimpleGrantedAuthority(userRole.value))
-                )
+            val principal = CustomUserPrincipal(userId, userRole.value)
+            val authorities = listOf(SimpleGrantedAuthority(userRole.value))
 
-            // 로그인 감시·감사 로그에 IP/세션 기록 & 세션 제어 및 동시 로그인 제한 & IP 기반 보안 정책 적용
+            val auth = UsernamePasswordAuthenticationToken(principal, null, authorities)
             auth.details = WebAuthenticationDetailsSource().buildDetails(request)
 
-//            SecurityContextHolder.getContext().authentication = auth
-            SecurityContextHolder.getContext().authentication =
-                UsernamePasswordAuthenticationToken(
-                    CustomUserPrincipal(userId, userRole.value),
-                    null,
-                    emptyList()
-                )
+            SecurityContextHolder.getContext().authentication = auth
         }
 
         filterChain.doFilter(request, response)
