@@ -6,5 +6,4 @@ class BbsImageResponse(
     val isPrimary: Boolean,
     val caption: String?,
     val sortOrder: Int
-) {
-}
+)

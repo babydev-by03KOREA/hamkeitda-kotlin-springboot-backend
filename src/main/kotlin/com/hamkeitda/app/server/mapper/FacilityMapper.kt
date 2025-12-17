@@ -1,9 +1,11 @@
 package com.hamkeitda.app.server.mapper
 
+import com.hamkeitda.app.server.common.exception.ApiException
 import com.hamkeitda.app.server.dto.facility.response.FacilityDetailResponse
-import com.hamkeitda.app.server.dto.facility.response.FacilitySummaryResponse
+import com.hamkeitda.app.server.dto.facility.response.FacilityNearbyResponse
 import com.hamkeitda.app.server.entity.facility.BBS
 import com.hamkeitda.app.server.entity.facility.Facility
+import org.springframework.http.HttpStatus
 
 fun Facility.toDetailDto(bbsList: List<BBS>): FacilityDetailResponse {
     return FacilityDetailResponse(
@@ -63,5 +65,25 @@ fun Facility.toDetailDto(bbsList: List<BBS>): FacilityDetailResponse {
             )
         }
     )
+}
 
+fun Facility.toNearbyDto(): FacilityNearbyResponse {
+    val lat = latitude?.toDouble()
+        ?: throw ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "latitude 없음")
+
+    val lng = longitude?.toDouble()
+        ?: throw ApiException(HttpStatus.INTERNAL_SERVER_ERROR, "longitude 없음")
+
+    return FacilityNearbyResponse(
+        id = id,
+        name = name,
+        openHours = "${openTime?.toString()?.substring(0,5)} - ${closedTime?.toString()?.substring(0,5)}",
+        phone = phoneNumber,
+        address = address,
+        description = description,
+        lat = lat,
+        lng = lng,
+        imageUrl = images.firstOrNull()?.url,
+        imageUrls = images.map { it.url }
+    )
 }

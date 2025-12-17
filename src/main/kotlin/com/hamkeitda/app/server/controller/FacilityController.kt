@@ -1,6 +1,7 @@
 package com.hamkeitda.app.server.controller
 
 import com.hamkeitda.app.server.dto.facility.request.CounselRequest
+import com.hamkeitda.app.server.mapper.toNearbyDto
 import com.hamkeitda.app.server.service.FacilityService
 import org.slf4j.LoggerFactory
 import org.springframework.security.access.prepost.PreAuthorize
@@ -38,7 +39,7 @@ class FacilityController(
         @RequestParam lat: Double,
         @RequestParam lng: Double,
         @RequestParam(defaultValue = "1000") radius: Int,
-    ) = facilityService.getNearby(lat, lng, radius)
+    ) = facilityService.getNearby(lat, lng, radius).map { it.toNearbyDto() }
 
     // 근처 시설 위치 불러오기
     @GetMapping("/nearby/points")
